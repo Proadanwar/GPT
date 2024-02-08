@@ -24,11 +24,16 @@ def echo_all(message):
         "api_key": "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",
         "temperature": 0.9
     }
-    # Send a POST request to the model URL
-    response = requests.post(URL, json=data).json()
-    text = response["choices"][0]["message"]["content"]
-    # Reply to the user with the model response
-    bot.reply_to(message, text, parse_mode='markdown')
+    try:
+        # Send a POST request to the model URL
+        response = requests.post(URL, json=data)
+        response.raise_for_status()  # Raise an exception for 4XX or 5XX errors
+        response_data = response.json()
+        text = response_data["choices"][0]["message"]["content"]
+        # Reply to the user with the model response
+        bot.reply_to(message, text, parse_mode='markdown')
+    except requests.RequestException as e:
+        bot.reply_to(message, f"Error processing your request: {str(e)}")
 
 # Start the bot
 bot.polling()
